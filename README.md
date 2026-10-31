@@ -1,2 +1,3 @@
-# talk2apk-test
-Test repo for talk2apk generated apps
+# Matrix Wallpaper for Android
+
+The app is made with AI-based android app generator "Talk2apk"
