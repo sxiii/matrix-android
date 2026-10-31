@@ -44,9 +44,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -202,7 +202,55 @@ private fun ThemeCard(
                 .fillMaxWidth()
                 .height(140.dp)
         ) {
-            drawMatrixPreview(theme, columnData, offset)
+            val w = size.width
+            val h = size.height
+            val cols = columnData.size
+            val cellW = w / cols
+            val charH = 14f
+
+            drawIntoCanvas { canvas ->
+                val paint = android.graphics.Paint().apply {
+                    textAlign = android.graphics.Paint.Align.CENTER
+                    isAntiAlias = true
+                    textSize = 13f
+                }
+
+                for ((col, chars, meta) in columnData) {
+                    val (speed, startY) = meta
+                    val yOff = ((offset * speed + startY) % 1.4f) * h
+
+                    for ((i, ch) in chars.withIndex()) {
+                        val y = yOff + i * charH - chars.size * charH * 0.3f
+                        if (y < -charH || y > h + charH) continue
+
+                        val alpha = when {
+                            i == 0 -> 1f
+                            i < 3 -> 0.85f
+                            i < 7 -> 0.5f
+                            else -> 0.2f
+                        }
+                        val color = when {
+                            i == 0 -> theme.headColor
+                            i < 5 -> theme.bodyColor
+                            else -> theme.trailColor
+                        }
+
+                        paint.color = android.graphics.Color.argb(
+                            (alpha * 255).toInt(),
+                            android.graphics.Color.red(color),
+                            android.graphics.Color.green(color),
+                            android.graphics.Color.blue(color)
+                        )
+
+                        canvas.nativeCanvas.drawText(
+                            ch.toString(),
+                            col * cellW + cellW / 2f,
+                            y,
+                            paint
+                        )
+                    }
+                }
+            }
         }
 
         Spacer(Modifier.height(6.dp))
@@ -222,57 +270,6 @@ private fun ThemeCard(
                 color = Color(0xFF00FF46),
                 fontSize = 11.sp,
                 fontFamily = FontFamily.Monospace
-            )
-        }
-    }
-}
-
-private fun DrawScope.drawMatrixPreview(
-    theme: MatrixTheme,
-    columnData: List<Triple<Int, List<Char>, Pair<Float, Float>>>,
-    offset: Float
-) {
-    val w = size.width
-    val h = size.height
-    val cols = columnData.size
-    val cellW = w / cols
-    val charH = 14f
-
-    for ((col, chars, meta) in columnData) {
-        val (speed, startY) = meta
-        val yOff = ((offset * speed + startY) % 1.4f) * h
-
-        for ((i, ch) in chars.withIndex()) {
-            val y = yOff + i * charH - chars.size * charH * 0.3f
-            if (y < -charH || y > h + charH) continue
-
-            val alpha = when {
-                i == 0 -> 1f
-                i < 3 -> 0.85f
-                i < 7 -> 0.5f
-                else -> 0.2f
-            }
-            val color = when {
-                i == 0 -> Color(theme.headColor)
-                i < 5 -> Color(theme.bodyColor)
-                else -> Color(theme.trailColor)
-            }
-
-            drawContext.canvas.nativeCanvas.drawText(
-                ch.toString(),
-                col * cellW + cellW / 2f,
-                y,
-                android.graphics.Paint().apply {
-                    this.color = android.graphics.Color.argb(
-                        (alpha * 255).toInt(),
-                        android.graphics.Color.red(color.hashCode()),
-                        android.graphics.Color.green(color.hashCode()),
-                        android.graphics.Color.blue(color.hashCode())
-                    )
-                    textSize = 13f
-                    textAlign = android.graphics.Paint.Align.CENTER
-                    isAntiAlias = true
-                }
             )
         }
     }
