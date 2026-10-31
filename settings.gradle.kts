@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "AnimatedHello"
+rootProject.name = "MatrixWallpaper"
 include(":app")

@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.animatedhello"
+    namespace = "com.example.matrixwallpaper"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.animatedhello"
+        applicationId = "com.example.matrixwallpaper"
         minSdk = 23
         targetSdk = 35
         versionCode = 1
@@ -29,5 +29,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material:material-icons-extended")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
     debugImplementation("androidx.compose.ui:ui-tooling")
 }
